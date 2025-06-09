@@ -12,3 +12,6 @@ Example Path: `cameoInstallDir=C:\\portable_programs\\cameo-installs\\Cameo-Syst
 2. Open the build.gradle in intellij and click Load Gradle Project
 
 3. Open the `build.gradle` in intellij and click the green arrow next to the `debugJar` task to run or debug. 
+
+
+![DemoVideo](https://github.com/user-attachments/assets/190e3a71-5280-4770-86bd-14a7698c2c3e)
