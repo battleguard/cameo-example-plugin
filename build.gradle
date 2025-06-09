@@ -1,0 +1,68 @@
+plugins {
+    id("java")
+}
+
+jar {
+    destinationDirectory.set(file("$buildDir/cameo-example-plugin/plugins/cameo-example-plugin"))
+}
+
+if (!hasProperty('cameoInstallDir')) {
+    throw new GradleException('cannot find cameoInstallDir property inside gradle.properties file' +
+            'Please create a gradle.properties file at the project root with: cameoInstallDir=<cameo_install_path>')
+}
+
+// strip quotes if found since they mess up pathing
+def cameoInstallDir = "$cameoInstallDir".replace('"', '')
+def cameoInstallDirectory = new File("$cameoInstallDir")
+
+if (!cameoInstallDirectory.isDirectory()) {
+    throw new GradleException("cameoInstallDir gradle property ($cameoInstallDir) resolved to: " +
+            "\"" + cameoInstallDirectory.getAbsolutePath() + "\"" +
+            "\n   which cannot be resolved to a known directory on your system. Please update your gradle.properties " +
+            "to have a valid cameoInstallDir property path")
+}
+
+println("using cameo java dependencies from cameoInstallDir='$cameoInstallDir'")
+def javaVersion = JavaVersion.current()
+println("using java version $javaVersion")
+
+dependencies {
+    implementation(fileTree(dir: "$cameoInstallDir/lib", include: ["*.jar"],
+            exclude: ["org.apache.commons.lang*.jar", "junit*.jar", "JUnit*.jar"]))
+    // we have a dependency on a couple of different plugins. This shows how to bring them in otherwise 
+    implementation(fileTree(dir: "$cameoInstallDir/plugins/com.nomagic.magicdraw.fileattachments", include: ["*.jar"]))
+    implementation(fileTree(dir: "$cameoInstallDir/plugins/com.nomagic.magicdraw.simulation", include: ["*.jar"]))
+    implementation(fileTree(dir: "$cameoInstallDir/plugins/com.nomagic.magicdraw.importexport", include: ["*.jar"]))
+}
+
+tasks.register('copyConfig', Copy) {
+    description "Copies cameo configs + directory structure needed for generating a plugin."
+    from layout.projectDirectory.dir("config")
+    into layout.buildDirectory
+}
+jar.dependsOn copyConfig
+
+task debugJar(dependsOn: 'classes', type: JavaExec) {
+
+    // setup cameo plugin loader to look load plugins from the default install and our created plugin directory
+    systemProperties['md.plugins.dir'] = "$cameoInstallDir/plugins;$buildDir/cameo-example-plugin/plugins"
+    // properties copied from MagicDrawTestRunner and its impl calls
+    systemProperties['profiler.disable.auto.checker'] = "true"
+    systemProperties['debug.properties.file'] = "test.properties"
+    systemProperties['log4j.configurationFile'] = "$projectDir/log4j2-config-debugger.xml"
+    // note DEVELOPER will throw MissingResourceException that seem to be ok
+    args "DEVELOPER", "TESTER"
+
+    description "Runs cameo main entrypoint, but adds cameo-example-plugin plugin from build directory to plugin path. (Used for debugging)"
+    mainClass = 'com.nomagic.magicdraw.Main'
+    classpath = files(
+            "$cameoInstallDir\\lib\\md_api.jar",
+            fileTree(dir: "$cameoInstallDir\\lib", include: "*.jar")
+    )
+    workingDir = "$projectDir"
+}
+debugJar.dependsOn jar
+
+jar {
+
+}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="cameoExamplePlugin" name="Cameo-Example-Plugin" version="1.0.0" provider-name="Coder" class="cameoExamplePlugin.CameoExamplePlugin">
+    <runtime>
+        <library name="cameo-example-plugin.jar"/>
+    </runtime>
+    <requires>
+        <required-plugin id="SimulationToolkit" name="Cameo Simulation Toolkit"/>
+        <required-plugin id="com.nomagic.magicdraw.importexport" name="Import Export Plugin"/>
+        <required-plugin id="com.nomagic.magicdraw.fileattachments" name="File Attachments"/>
+    </requires>
+</plugin>

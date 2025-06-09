@@ -1,0 +1,13 @@
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# ignore user configured gradle properties file
+gradle.properties
+
+# Ignore Gradle build output directory
+build
+
+.vscode
+.idea
+
+*.log
